@@ -1,0 +1,5 @@
+
+
+
+ehome:
+  port: ${ehome_port:7660}
