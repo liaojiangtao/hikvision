@@ -14,7 +14,7 @@ import com.sun.jna.Library;
  */
 public interface HCEHomeCMS extends Library {
 
-    HCEHomeCMS INSTANCE = (HCEHomeCMS) Native.loadLibrary("HCEHomeCMS",
+    HCEHomeCMS INSTANCE = (HCEHomeCMS) Native.load("HCEHomeCMS",
             HCEHomeCMS.class);
     /***宏定义***/
     //常量
@@ -29,6 +29,9 @@ public interface HCEHomeCMS extends Library {
 
     public static final int MAX_MASTER_KEY_LEN = 16;
 
+    @Structure.FieldOrder({"dwSize", "dwNetUnitType", "byDeviceID", "byFirmwareVersion", "struDevAdd", "dwDevType",
+            "dwManufacture", "byPassWord", "sDeviceSerial", "byReliableTransmission", "byWebSocketTransmission",
+            "bySupportRedirect", "byDevProtocolVersion", "bySessionKey"})
     public static class NET_EHOME_DEV_REG_INFO extends Structure {
         public int dwSize;
         public int dwNetUnitType;            //根据EHomeSDK协议预留，目前没有意义
@@ -48,7 +51,9 @@ public interface HCEHomeCMS extends Library {
         public byte[] bySessionKey = new byte[MAX_MASTER_KEY_LEN]; //Ehome5.0设备SessionKey
     }
 
-
+    @Structure.FieldOrder({"dwSize", "dwKeepAliveSec", "dwTimeOutCount", "struTCPAlarmSever", "struUDPAlarmSever",
+            "dwAlarmServerType", "struNTPSever", "dwNTPInterval", "struPictureSever", "dwPicServerType", "struBlackListServer",
+            "struRedirectSever", "byClouldAccessKey", "byClouldSecretKey", "byClouldHttps", "byRes"})
     public static class NET_EHOME_SERVER_INFO_V50 extends Structure {
         public int dwSize;
         public int dwKeepAliveSec;            //心跳间隔（单位：秒,0:默认为15S）
@@ -69,7 +74,9 @@ public interface HCEHomeCMS extends Library {
         public byte[] byRes = new byte[383];
     }
 
-
+    @Structure.FieldOrder({"dwSize", "dwKeepAliveSec", "dwTimeOutCount", "struTCPAlarmSever", "struUDPAlarmSever",
+            "dwAlarmServerType", "struNTPSever", "dwNTPInterval", "struPictureSever", "dwPicServerType",
+            "struBlackListServer", "byRes"})
     public static class NET_EHOME_SERVER_INFO extends Structure {
         public int dwSize;
         public int dwKeepAliveSec;            //心跳间隔（单位：秒,0:默认为15S）
@@ -85,7 +92,7 @@ public interface HCEHomeCMS extends Library {
         public byte[] byRes = new byte[128];
     }
 
-
+    @Structure.FieldOrder({"struAdd", "byServerName", "byUserName", "byPassWord", "byRes"})
     public static class NET_EHOME_BLACKLIST_SEVER extends Structure {
         public NET_EHOME_IPADDRESS struAdd = new NET_EHOME_IPADDRESS(); //服务器地址
         public byte[] byServerName = new byte[32];  //服务器名称
@@ -94,12 +101,14 @@ public interface HCEHomeCMS extends Library {
         public byte[] byRes = new byte[64];
     }
 
+    @Structure.FieldOrder({"dwSize", "byAccessSecurity", "byRes"})
     public static class NET_EHOME_LOCAL_ACCESS_SECURITY extends Structure {
         public int dwSize;
         public byte byAccessSecurity;
         public byte[] byRes = new byte[127];
     }
 
+    @Structure.FieldOrder({"dwSize", "byEnable", "byRes1", "struAddress", "byRes2"})
     public static class NET_EHOME_AMS_ADDRESS extends Structure {
         public int dwSize;
         public byte byEnable;
@@ -108,6 +117,7 @@ public interface HCEHomeCMS extends Library {
         public byte[] byRes2 = new byte[32];
     }
 
+    @Structure.FieldOrder({"szIP", "wPort", "byRes"})
     public static class NET_EHOME_IPADDRESS extends Structure {
         public byte[] szIP = new byte[128];
         public short wPort;     //端口
@@ -118,6 +128,7 @@ public interface HCEHomeCMS extends Library {
         public boolean invoke(NativeLong lUserID, int dwDataType, Pointer pOutBuffer, int dwOutLen, NET_EHOME_SERVER_INFO pInBuffer, int dwInLen, Pointer pUser);
     }
 
+    @Structure.FieldOrder({"struAddress", "fnCB", "pUserData", "byRes"})
     public static class NET_EHOME_CMS_LISTEN_PARAM extends Structure {
         public NET_EHOME_IPADDRESS struAddress;  //本地监听信息，IP为0.0.0.0的情况下，默认为本地地址，多个网卡的情况下，默认为从操作系统获取到的第一个
         public DEVICE_REGISTER_CB fnCB; //报警信息回调函数
@@ -129,6 +140,7 @@ public interface HCEHomeCMS extends Library {
         public void invoke(NativeLong iVoiceHandle, byte[] pRecvDataBuffer, int dwBufSize, int dwEncodeType, byte byAudioFlag, Pointer pUser);
     }
 
+    @Structure.FieldOrder({"bNeedCBNoEncData", "cbVoiceDataCallBack", "dwEncodeType", "pUser", "byVoiceTalk", "byDevAudioEnc", "byRes"})
     public static class NET_EHOME_VOICETALK_PARA extends Structure {
         public boolean bNeedCBNoEncData; //需要回调的语音类型：0-编码后语音，1-编码前语音（语音转发时不支持）
         public fVoiceDataCallBack cbVoiceDataCallBack; //用于回调音频数据的回调函数
@@ -140,6 +152,7 @@ public interface HCEHomeCMS extends Library {
     }
 
     //预览请求
+    @Structure.FieldOrder({"iChannel", "dwStreamType", "dwLinkMode", "struStreamSever"})
     public static class NET_EHOME_PREVIEWINFO_IN extends Structure {
         public int iChannel;                        //通道号
         public int dwStreamType;                    // 码流类型，0-主码流，1-子码流, 2-第三码流
@@ -147,6 +160,7 @@ public interface HCEHomeCMS extends Library {
         public NET_EHOME_IPADDRESS struStreamSever;     //流媒体地址
     }
 
+    @Structure.FieldOrder({"iChannel", "dwStreamType", "dwLinkMode", "struStreamSever", "byDelayPreview", "byRes"})
     public static class NET_EHOME_PREVIEWINFO_IN_V11 extends Structure {
         public int iChannel;
         public int dwStreamType;
@@ -156,24 +170,27 @@ public interface HCEHomeCMS extends Library {
         public byte[] byRes = new byte[31];
     }
 
+    @Structure.FieldOrder({"lSessionID", "byRes"})
     public static class NET_EHOME_PREVIEWINFO_OUT extends Structure {
         public NativeLong lSessionID;
         public byte[] byRes = new byte[128];
     }
 
+    @Structure.FieldOrder({"dwSize", "lSessionID", "byRes"})
     public static class NET_EHOME_PUSHSTREAM_IN extends Structure {
         public int dwSize;
         public NativeLong lSessionID;
         public byte[] byRes = new byte[128];
     }
 
-
+    @Structure.FieldOrder({"dwSize", "byRes"})
     public static class NET_EHOME_PUSHSTREAM_OUT extends Structure {
         public int dwSize;
         public byte[] byRes = new byte[128];
     }
 
-
+    @Structure.FieldOrder({"pRequestUrl", "dwRequestUrlLen", "pCondBuffer", "dwCondSize", "pInBuffer", "dwInSize",
+            "pOutBuffer", "dwOutSize", "dwReturnedXMLLen", "byRes"})
     public static class NET_EHOME_PTXML_PARAM extends Structure {
         public Pointer pRequestUrl;        //请求URL
         public int dwRequestUrlLen;    //请求URL长度
@@ -187,7 +204,8 @@ public interface HCEHomeCMS extends Library {
         public byte[] byRes = new byte[32];          //保留
     }
 
-
+    @Structure.FieldOrder({"pCmdBuf", "dwCmdLen", "pInBuf", "dwInSize", "pOutBuf", "dwOutSize", "dwSendTimeOut",
+            "dwRecvTimeOut", "pStatusBuf", "dwStatusSize", "byRes"})
     public static class NET_EHOME_XML_CFG extends Structure {
         public Pointer pCmdBuf;    //字符串格式命令，参见1.2.3
         public int dwCmdLen;   //pCmdBuf长度
@@ -202,6 +220,8 @@ public interface HCEHomeCMS extends Library {
         public byte[] byRes = new byte[24];
     }
 
+    @Structure.FieldOrder({"dwSize", "lpInbuffer", "dwInBufferSize", "dwSendTimeOut", "dwRecvTimeOut", "lpOutBuffer",
+            "dwOutBufferSize", "lpStatusBuffer", "dwStatusBufferSize", "byRes"})
     public static class NET_EHOME_XML_REMOTE_CTRL_PARAM extends Structure {
         public int dwSize;
         public Pointer lpInbuffer;
@@ -217,11 +237,12 @@ public interface HCEHomeCMS extends Library {
 
     ;
 
-
+    @Structure.FieldOrder({"byString"})
     public static class NET_DVR_STRING_POINTER extends Structure {
         public byte[] byString = new byte[2 * 1024];
     }
 
+    @Structure.FieldOrder({"pCondBuf", "dwCondSize", "pInBuf", "dwInSize", "pOutBuf", "dwOutSize", "byRes"})
     public static class NET_EHOME_CONFIG extends Structure {
         public Pointer pCondBuf;
         public int dwCondSize;
@@ -232,6 +253,10 @@ public interface HCEHomeCMS extends Library {
         public byte[] byRes = new byte[40];
     }
 
+    @Structure.FieldOrder({"dwSize", "dwChannelNumber", "dwChannelAmount", "dwDevType", "dwDiskNumber", "sSerialNumber",
+            "dwAlarmInPortNum", "dwAlarmInAmount", "dwAlarmOutPortNum", "dwAlarmOutAmount", "dwStartChannel",
+            "dwAudioChanNum", "dwMaxDigitChannelNum", "dwAudioEncType", "sSIMCardSN", "sSIMCardPhoneNum",
+            "dwSupportZeroChan", "dwStartZeroChan", "dwSmartType", "byRes"})
     public static class NET_EHOME_DEVICE_INFO extends Structure {
         public int dwSize;
         public int dwChannelNumber;
@@ -257,6 +282,7 @@ public interface HCEHomeCMS extends Library {
 
     ;
 
+    @Structure.FieldOrder({"dwChannel", "dwRecType", "struStartTime", "struStopTime", "dwStartIndex", "dwMaxFileCountPer", "byRes"})
     public static class NET_EHOME_REC_FILE_COND extends Structure {
         public int dwChannel; //通道号
         public int dwRecType;//录像类型：0xff-全部类型，0-定时录像，1-移动报警，2-报警触发，3-报警|动测，4-报警&动测，5-命令触发，6-手动录像，7-震动报警，8-环境报警，9-智能报警（或者取证录像），10（0x0a）-PIR报警，11（0x0b）-无线报警，12（0x0c）-呼救报警，13（0x0d）-全部报警
@@ -269,6 +295,8 @@ public interface HCEHomeCMS extends Library {
 
     ;
 
+    @Structure.FieldOrder({"dwSize", "sFileName", "struStartTime", "struStopTime", "dwFileSize", "dwFileMainType",
+            "dwFileSubType", "dwFileIndex", "byRes"})
     public static class NET_EHOME_REC_FILE extends Structure {
         public int dwSize;
         public byte[] sFileName = new byte[100];
@@ -283,6 +311,7 @@ public interface HCEHomeCMS extends Library {
 
     ;
 
+    @Structure.FieldOrder({"wYear", "byMonth", "byDay", "byHour", "byMinute", "bySecond", "byRes1", "wMSecond", "byRes2"})
     public static class NET_EHOME_TIME extends Structure {
         public short wYear;//年
         public byte byMonth;//月
@@ -361,7 +390,4 @@ public interface HCEHomeCMS extends Library {
     NativeLong NET_ECMS_FindNextFile_V11(NativeLong lHandle, Pointer pFindData, int dwDataSize);
 
     boolean NET_ECMS_StopFindFile(NativeLong lHandle);
-    //boolean  NET_ECMS_StartPlayBack(NativeLong lUserID, NET_EHOME_PLAYBACK_INFO_IN pPlaybackInfoIn, NET_EHOME_PLAYBACK_INFO_OUT pPlaybackInfoOut);
-    //boolean  NET_ECMS_StartPushPlayBack(NativeLong lUserID, NET_EHOME_PUSHPLAYBACK_IN struPushPlayBackIn, NET_EHOME_PUSHPLAYBACK_OUT struPushPlayBackOut);
-
 }

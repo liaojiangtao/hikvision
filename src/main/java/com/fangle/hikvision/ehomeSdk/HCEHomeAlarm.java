@@ -9,23 +9,27 @@ import com.sun.jna.*;
  */
 public interface HCEHomeAlarm extends Library {
 
-    HCEHomeAlarm INSTANCE = (HCEHomeAlarm) Native.loadLibrary("HCEHomeAlarm",
+    HCEHomeAlarm INSTANCE = (HCEHomeAlarm) Native.load("HCEHomeAlarm",
             HCEHomeAlarm.class);
     /***宏定义***/
     //常量
     public static final int MAX_DEVICE_ID_LEN = 256;    //设备ID长度
     public static final int NET_EHOME_SERIAL_LEN = 12;  //设备序列号长度
 
+    @Structure.FieldOrder({"szIP", "wPort", "byRes"})
     public static class NET_EHOME_IPADDRESS extends Structure {
         public byte[] szIP = new byte[128];
         public short wPort;     //端口
         public byte[] byRes = new byte[2];
     }
 
+    @Structure.FieldOrder({"byXMLData"})
     public static class NET_EHOME_XML_DATA extends Structure {
         public byte[] byXMLData = new byte[2048];
     }
 
+    @Structure.FieldOrder({"dwAlarmType", "pAlarmInfo", "dwAlarmInfoLen", "pXmlBuf", "dwXmlBufLen", "sSerialNumber",
+            "pHttpUrl", "dwHttpUrlLen", "byRes"})
     public static class NET_EHOME_ALARM_MSG extends Structure {
         public int dwAlarmType;      //报警类型，见EN_ALARM_TYPE
         public Pointer pAlarmInfo;       //报警内容（结构体）
@@ -38,10 +42,12 @@ public interface HCEHomeAlarm extends Library {
         public byte[] byRes = new byte[12];
     }
 
+    @Structure.FieldOrder({"invoke"})
     public static interface EHomeMsgCallBack extends Callback {
         public boolean invoke(NativeLong iHandle, NET_EHOME_ALARM_MSG pAlarmMsg, Pointer pUser);
     }
 
+    @Structure.FieldOrder({"struAddress", "fnMsgCb", "pUserData", "byProtocolType", "byUseCmsPort", "byUseThreadPool", "byRes"})
     public static class NET_EHOME_ALARM_LISTEN_PARAM extends Structure {
         public NET_EHOME_IPADDRESS struAddress;
         public EHomeMsgCallBack fnMsgCb; //报警信息回调函数

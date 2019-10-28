@@ -10,7 +10,7 @@ import com.sun.jna.*;
  */
 public interface HCEHomeSS extends Library {
 
-    HCEHomeSS INSTANCE = (HCEHomeSS) Native.loadLibrary("HCEHomeSS", HCEHomeSS.class);
+    HCEHomeSS INSTANCE = (HCEHomeSS) Native.load("HCEHomeSS", HCEHomeSS.class);
 
     /***宏定义***/
     //常量
@@ -58,6 +58,7 @@ public interface HCEHomeSS extends Library {
     /**
      * Tomcat图片服务器回调信息
      */
+    @Structure.FieldOrder({"szDevUri", "dwPicNum", "pPicURLs", "byRes"})
     public static class NET_EHOME_SS_TOMCAT_MSG extends Structure {
         public byte[] szDevUri = new byte[MAX_URL_LEN_SS]; //设备请求的URI
         public int dwPicNum; //图片数
@@ -68,6 +69,8 @@ public interface HCEHomeSS extends Library {
     /**
      * 监听参数
      */
+    @Structure.FieldOrder({"struAddress", "szKMS_UserName", "szKMS_Password", "fnSStorageCb", "fnSSMsgCb",
+            "szAccessKey", "szSecretKey", "pUserData", "byHttps", "byRes1", "fnSSRWCb", "byRes"})
     public static class NET_EHOME_SS_LISTEN_PARAM extends Structure {
         public NET_EHOME_IPADDRESS struAddress; //本地监听信息，IP为0.0.0.0的情况下，默认为本地地址，多个网卡的情况下，默认为从操作系统获取到的第一个
         public byte[] szKMS_UserName = new byte[MAX_KMS_USER_LEN]; //KMS用户名
@@ -86,6 +89,7 @@ public interface HCEHomeSS extends Library {
     /**
      * IP地址结构体
      */
+    @Structure.FieldOrder({"szIP", "wPort", "byRes"})
     public static class NET_EHOME_IPADDRESS extends Structure {
         public byte[] szIP = new byte[128]; //IP地址
         public short wPort; //端口号
@@ -95,6 +99,8 @@ public interface HCEHomeSS extends Library {
     /**
      * 监听Https参数
      */
+    @Structure.FieldOrder({"byHttps", "byVerifyMode", "byCertificateFileType", "byPrivateKeyFileType",
+            "szUserCertificateFile", "szUserPrivateKeyFile", "dwSSLVersion", "byRes3"})
     public static class NET_EHOME_SS_LISTEN_HTTPS_PARAM extends Structure {
         public byte byHttps; //0-不启用HTTPS 1-启用HTTPS
         public byte byVerifyMode; //0-单向认证(暂只支持单向认证)
@@ -111,6 +117,7 @@ public interface HCEHomeSS extends Library {
     /**
      * 图片上传客户端参数
      */
+    @Structure.FieldOrder({"enumType", "struAddress", "byHttps", "byRes"})
     public static class NET_EHOME_SS_CLIENT_PARAM extends Structure {
         public int enumType; //图片上传客户端类型  NET_EHOME_SS_CLIENT_TYPE
         public NET_EHOME_IPADDRESS struAddress; //图片服务器地址
@@ -118,6 +125,7 @@ public interface HCEHomeSS extends Library {
         public byte[] byRes = new byte[63];
     }
 
+    @Structure.FieldOrder({"sPath", "byRes"})
     public static class NET_EHOME_SS_LOCAL_SDK_PATH extends Structure {
         public byte[] sPath = new byte[MAX_PATH];
         public byte[] byRes = new byte[128];
@@ -268,5 +276,4 @@ public interface HCEHomeSS extends Library {
 
     //计算HMAC-SHA256
     boolean NET_ESS_HAMSHA256(String pSrc, String pSecretKey, String pSingatureOut, int dwSingatureLen);
-
 }

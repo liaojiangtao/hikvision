@@ -9,9 +9,10 @@ import com.sun.jna.*;
  */
 public interface HCEHomeStream extends Library {
 
-    HCEHomeStream INSTANCE = (HCEHomeStream) Native.loadLibrary("HCEHomeStream",
+    HCEHomeStream INSTANCE = (HCEHomeStream) Native.load("HCEHomeStream",
             HCEHomeStream.class);
 
+    @Structure.FieldOrder({"struIPAdress", "fnNewLinkCB", "pUser", "byLinkMode", "byRes"})
     public class NET_EHOME_LISTEN_PREVIEW_CFG extends Structure {
         public HCEHomeCMS.NET_EHOME_IPADDRESS struIPAdress; //本地监听信息，IP为0.0.0.0的情况下，默认为本地地址，多个网卡的情况下，默认为从操作系统获取到的第一个
         public PREVIEW_NEWLINK_CB fnNewLinkCB; //预览请求回调函数，当收到预览连接请求后，SDK会回调该回调函数。
@@ -20,6 +21,7 @@ public interface HCEHomeStream extends Library {
         public byte[] byRes = new byte[127];
     }
 
+    @Structure.FieldOrder({"szDeviceID", "iSessionID", "dwChannelNo", "byStreamType", "byRes1", "sDeviceSerial", "byRes"})
     public class NET_EHOME_NEWLINK_CB_MSG extends Structure {
         public byte[] szDeviceID = new byte[HCEHomeCMS.MAX_DEVICE_ID_LEN];   //设备标示符
         public NativeLong iSessionID;     //设备分配给该取流会话的ID
@@ -30,6 +32,7 @@ public interface HCEHomeStream extends Library {
         public byte[] byRes = new byte[112];
     }
 
+    @Structure.FieldOrder({"byDataType", "byRes1", "pRecvdata", "dwDataLen", "byRes2"})
     public class NET_EHOME_PREVIEW_CB_MSG extends Structure {
         public byte byDataType;       //NET_DVR_SYSHEAD(1)-码流头，NET_DVR_STREAMDATA(2)-码流数据
         public byte[] byRes1 = new byte[3];
@@ -38,6 +41,7 @@ public interface HCEHomeStream extends Library {
         public byte[] byRes2 = new byte[128];
     }
 
+    @Structure.FieldOrder({"fnPreviewDataCB", "pUserData", "byRes"})
     public class NET_EHOME_PREVIEW_DATA_CB_PARAM extends Structure {
         public PREVIEW_DATA_CB fnPreviewDataCB;    //数据回调函数
         public Pointer pUserData;         //用户参数, 在fnPreviewDataCB回调出来
