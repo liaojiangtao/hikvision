@@ -10,7 +10,9 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 
+@ComponentScan(basePackages = {"com.fangle.hikvision.**"})
 @SpringBootApplication
 @ImportAutoConfiguration(value = {EhomeConfig.class})
 public class HikvisionApplication {
@@ -19,7 +21,7 @@ public class HikvisionApplication {
     private ApplicationContext applicationContext;
 
     /**
-     * spring ºØ≥…Akka
+     * spring ÈõÜÊàêAkka
      *
      * @return
      */
@@ -29,7 +31,7 @@ public class HikvisionApplication {
     }
 
     /**
-     * Akka≈‰÷√
+     * AkkaÈÖçÁΩÆ
      *
      * @return
      */

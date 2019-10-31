@@ -42,7 +42,6 @@ public interface HCEHomeAlarm extends Library {
         public byte[] byRes = new byte[12];
     }
 
-    @Structure.FieldOrder({"invoke"})
     public static interface EHomeMsgCallBack extends Callback {
         public boolean invoke(NativeLong iHandle, NET_EHOME_ALARM_MSG pAlarmMsg, Pointer pUser);
     }
@@ -65,4 +64,6 @@ public interface HCEHomeAlarm extends Library {
     boolean NET_EALARM_Fini();
 
     NativeLong NET_EALARM_StartListen(NET_EHOME_ALARM_LISTEN_PARAM pAlarmListenParam);
+
+    boolean NET_EALARM_SetLogToFile(int iLogLevel, String strLogDir, boolean bAutoDel);
 }

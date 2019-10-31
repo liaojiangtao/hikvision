@@ -77,7 +77,7 @@ public class EhomeServer {
         FRegisterCallBack fRegisterCallBack = null;
         EHomeMsgCallBack eHomeMsgCallBack = null;
         PSSMessageCallback pSSMessageCallback = null;
-        PSSStorageCallback pSSStorageCallback = null;// ÎÄ¼ş±£´æ»Øµ÷º¯Êı(ÏÂÔØ)
+        PSSStorageCallback pSSStorageCallback = null;// æ–‡ä»¶ä¿å­˜å›è°ƒå‡½æ•°(ä¸‹è½½)
 
         @Override
         public void run() {
@@ -88,12 +88,12 @@ public class EhomeServer {
         }
 
         /**
-         * ±¨¾¯Ä£¿é³õÊ¼»¯
+         * æŠ¥è­¦æ¨¡å—åˆå§‹åŒ–
          *
          * @return
          */
         private boolean hceAlarmInit() {
-            // ±¨¾¯Ä£¿é³õÊ¼»¯
+            // æŠ¥è­¦æ¨¡å—åˆå§‹åŒ–
             boolean bRet = hceHomeAlarm.NET_EALARM_Init();
             if (!bRet) {
                 log.error("NET_EALARM_Init failed!");
@@ -102,21 +102,27 @@ public class EhomeServer {
             if (eHomeMsgCallBack == null) {
                 eHomeMsgCallBack = new EHomeMsgCallBack();
             }
+            boolean alarmLogToFile = hceHomeAlarm.NET_EALARM_SetLogToFile(3, "/home/gentel/EhomePicServer/", false);
+
+            if (false == alarmLogToFile){
+                log.error("NET_EALARM_SetLogToFile init error!");
+                return false;
+            }
 
             HCEHomeAlarm.NET_EHOME_ALARM_LISTEN_PARAM netEhomeAlarmListenParam = new HCEHomeAlarm.NET_EHOME_ALARM_LISTEN_PARAM();
             netEhomeAlarmListenParam.struAddress.szIP = tcpAlarmIp.getBytes();
             netEhomeAlarmListenParam.struAddress.wPort = tcpAlarmPort;
             netEhomeAlarmListenParam.fnMsgCb = eHomeMsgCallBack;
             netEhomeAlarmListenParam.pUserData = null;
-            netEhomeAlarmListenParam.byProtocolType = 1;//Ğ­ÒéÀàĞÍ£¬0-TCP,1-UDP,2-MQTT
-            netEhomeAlarmListenParam.byUseCmsPort = 0;//ÊÇ·ñ¸´ÓÃCMS¶Ë¿Ú£º0 - ²»¸´ÓÃ£¬·Ç0 - ¸´ÓÃ
+            netEhomeAlarmListenParam.byProtocolType = 1;//åè®®ç±»å‹ï¼Œ0-TCP,1-UDP,2-MQTT
+            netEhomeAlarmListenParam.byUseCmsPort = 0;//æ˜¯å¦å¤ç”¨CMSç«¯å£ï¼š0 - ä¸å¤ç”¨ï¼Œé0 - å¤ç”¨
             netEhomeAlarmListenParam.byUseThreadPool = 0;
             NativeLong ARMListen = hceHomeAlarm.NET_EALARM_StartListen(netEhomeAlarmListenParam);
             if (ARMListen.byteValue() < 0) {
-                log.error("NET_EALARM_StartListenÊ§°Ü, error code:" + hceHomeCMS.NET_ECMS_GetLastError());
+                log.error("NET_EALARM_StartListenå¤±è´¥, error code:" + hceHomeCMS.NET_ECMS_GetLastError());
                 return false;
             } else {
-                log.info("Æô¶¯±¨¾¯¼àÌı³É¹¦");
+                log.info("å¯åŠ¨æŠ¥è­¦ç›‘å¬æˆåŠŸ");
             }
 
             log.info("NET_EALARM_StartListen:" + ARMListen);
@@ -161,12 +167,12 @@ public class EhomeServer {
         }
 
         /**
-         * ×¢²áÄ£¿é³õÊ¼»¯
+         * æ³¨å†Œæ¨¡å—åˆå§‹åŒ–
          *
          * @return
          */
         private boolean ecmsInit() {
-            // CMS×¢²áÄ£¿é³õÊ¼»¯
+            // CMSæ³¨å†Œæ¨¡å—åˆå§‹åŒ–
             boolean binit = hceHomeCMS.NET_ECMS_Init();
 
             if (false == binit) {
@@ -174,7 +180,7 @@ public class EhomeServer {
                 return false;
             }
 
-            // ×¢²á¼àÌı²ÎÊı
+            // æ³¨å†Œç›‘å¬å‚æ•°
             if (fRegisterCallBack == null) {
                 fRegisterCallBack = new FRegisterCallBack();
             }
@@ -185,39 +191,39 @@ public class EhomeServer {
             struCMSListenPara.struAddress.wPort = serverPort;
             struCMSListenPara.fnCB = fRegisterCallBack;
 
-            //Æô¶¯¼àÌı£¬½ÓÊÕÉè±¸×¢²áĞÅÏ¢
+            //å¯åŠ¨ç›‘å¬ï¼Œæ¥æ”¶è®¾å¤‡æ³¨å†Œä¿¡æ¯
             NativeLong lListen = hceHomeCMS.NET_ECMS_StartListen(struCMSListenPara);
             if (lListen.longValue() < -1) {
                 log.error("NET_ECMS_StartListen failed, error code:" + hceHomeCMS.NET_ECMS_GetLastError());
                 hceHomeCMS.NET_ECMS_Fini();
                 return false;
             }
-            log.info("ET_ECMS_StartListenÆô¶¯×¢²á¼àÌı³É¹¦!");
+            log.info("ET_ECMS_StartListenå¯åŠ¨æ³¨å†Œç›‘å¬æˆåŠŸ!");
             return true;
         }
 
         /**
-         * ¼àÌı»Øµ÷
+         * ç›‘å¬å›è°ƒ
          */
         class FRegisterCallBack implements HCEHomeCMS.DEVICE_REGISTER_CB {
             public boolean invoke(NativeLong lUserID, int dwDataType, Pointer pOutBuffer, int dwOutLen, HCEHomeCMS.NET_EHOME_SERVER_INFO pInBuffer, int dwInLen, Pointer pUser) {
-                // Éè±¸ÉÏÏß
+                // è®¾å¤‡ä¸Šçº¿
                 if (EhomeRegisterEnum.DEV_ON.getStatus().equals(dwDataType)) {
                     HCEHomeCMS.NET_EHOME_DEV_REG_INFO strDevRegInfo = getNetEhomeDevRegInfo(pOutBuffer, pInBuffer, dwInLen);
                     ehomeSessionManage.bindSession(lUserID, new String(strDevRegInfo.byDeviceID).trim());
-                    log.info("Éè±¸µÇÂ½:id-{}", new String(strDevRegInfo.byDeviceID).trim());
+                    log.info("è®¾å¤‡ç™»é™†:id-{}", new String(strDevRegInfo.byDeviceID).trim());
                 } else if (EhomeRegisterEnum.DEV_OFF.getStatus().equals(dwDataType)) {
                     ehomeSessionManage.unBindSession(lUserID);
-                    log.info("Éè±¸µôÏß:id-{}", lUserID);
+                    log.info("è®¾å¤‡æ‰çº¿:id-{}", lUserID);
                 } else if (EhomeRegisterEnum.DEV_ADDRESS_CHANGED.getStatus().equals(dwDataType)) {
                     HCEHomeCMS.NET_EHOME_DEV_REG_INFO strDevRegInfo = getNetEhomeDevRegInfo(pOutBuffer, pInBuffer, dwInLen);
                     ehomeSessionManage.bindSession(lUserID, new String(strDevRegInfo.byDeviceID).trim());
                     ehomeSessionManage.reBindSession(lUserID, new String(strDevRegInfo.byDeviceID).trim());
-                    log.info("Éè±¸µØÖ··¢Éú±ä»¯:id-{}", lUserID);
+                    log.info("è®¾å¤‡åœ°å€å‘ç”Ÿå˜åŒ–:id-{}", lUserID);
                 } else if (EhomeRegisterEnum.UNKNOWN.getStatus().equals(dwDataType)) {
-                    log.info("Î´ÖªÏûÏ¢:id-{}", lUserID);
+                    log.info("æœªçŸ¥æ¶ˆæ¯:id-{}", lUserID);
                 } else {
-                    log.info("½ÓÊÕµ½Î´ÖªµÄÏûÏ¢»Øµ÷ÀàĞÍ:id-{} type{}", lUserID, dwDataType);
+                    log.info("æ¥æ”¶åˆ°æœªçŸ¥çš„æ¶ˆæ¯å›è°ƒç±»å‹:id-{} type{}", lUserID, dwDataType);
                 }
                 return true;
             }
@@ -238,9 +244,9 @@ public class EhomeServer {
                 System.arraycopy(byTcpIP, 0, pInBuffer.struTCPAlarmSever.szIP, 0, byTcpIP.length);
                 pInBuffer.struTCPAlarmSever.wPort = tcpAlarmPort;
 
-                pInBuffer.dwAlarmServerType = 1; //±¨¾¯·şÎñÆ÷ÀàĞÍ£º0- Ö»Ö§³ÖUDPĞ­ÒéÉÏ±¨£¬1- Ö§³ÖUDP¡¢TCPÁ½ÖÖĞ­ÒéÉÏ±¨
+                pInBuffer.dwAlarmServerType = 1; //æŠ¥è­¦æœåŠ¡å™¨ç±»å‹ï¼š0- åªæ”¯æŒUDPåè®®ä¸ŠæŠ¥ï¼Œ1- æ”¯æŒUDPã€TCPä¸¤ç§åè®®ä¸ŠæŠ¥
 
-                pInBuffer.dwPicServerType = 0;//Í¼Æ¬·şÎñÆ÷ÀàĞÍÍ¼Æ¬·şÎñÆ÷ÀàĞÍ£¬1-VRBÍ¼Æ¬·şÎñÆ÷£¬0-TomcatÍ¼Æ¬·şÎñ,2-ÔÆ´æ´¢3,3-KMS,4-EHome5.0´æ´¢Ğ­Òé
+                pInBuffer.dwPicServerType = 0;//å›¾ç‰‡æœåŠ¡å™¨ç±»å‹å›¾ç‰‡æœåŠ¡å™¨ç±»å‹ï¼Œ1-VRBå›¾ç‰‡æœåŠ¡å™¨ï¼Œ0-Tomcatå›¾ç‰‡æœåŠ¡,2-äº‘å­˜å‚¨3,3-KMS,4-EHome5.0å­˜å‚¨åè®®
 
                 byte[] byPictureServerIP = pictureServerIp.getBytes();
                 System.arraycopy(byPictureServerIP, 0, pInBuffer.struPictureSever.szIP, 0, byPictureServerIP.length);
@@ -252,7 +258,7 @@ public class EhomeServer {
         }
 
         /**
-         * ±¨¾¯»Øµ÷
+         * æŠ¥è­¦å›è°ƒ
          */
         class EHomeMsgCallBack implements HCEHomeAlarm.EHomeMsgCallBack {
 
@@ -273,7 +279,7 @@ public class EhomeServer {
         }
 
         /**
-         * ĞÅÏ¢»Øµ÷º¯Êı(ÉÏ±¨)
+         * ä¿¡æ¯å›è°ƒå‡½æ•°(ä¸ŠæŠ¥)
          */
         public class PSSMessageCallback implements HCEHomeSS.EHomeSSMsgCallBack {
 
@@ -286,14 +292,14 @@ public class EhomeServer {
                     pTomcatMsg.write(0, pOutBuffer.getByteArray(0, strTomcatMsg.size()), 0, strTomcatMsg.size());
                     strTomcatMsg.read();
                     String str = new String(strTomcatMsg.szDevUri).trim();
-                    log.info("NET_EHOME_SS_TOMCAT_MSG szDevUriĞÅÏ¢£º" + str);
+                    log.info("NET_EHOME_SS_TOMCAT_MSG [szDevUri]ï¼š" + str + " strTomcatMsg size:" + strTomcatMsg.size());
                 }
                 return true;
             }
         }
 
         /**
-         * ÎÄ¼ş´æ´¢»Øµ÷
+         * æ–‡ä»¶å­˜å‚¨å›è°ƒ
          */
         public class PSSStorageCallback implements HCEHomeSS.EHomeSSStorageCallBack {
 
@@ -301,7 +307,7 @@ public class EhomeServer {
                 String strPath = "/home/gentel/EhomePicServer/";
                 String strFilePath = strPath + pFileName;
 
-                //ÅĞ¶ÏÎÄ¼şÂ·¾¶ÊÇ·ñ´æÔÚ,²»´æÔÚ´´½¨ÎÄ¼ş¼Ğ
+                //åˆ¤æ–­æ–‡ä»¶è·¯å¾„æ˜¯å¦å­˜åœ¨,ä¸å­˜åœ¨åˆ›å»ºæ–‡ä»¶å¤¹
                     /*
                    if (Directory.Exists(strPath) == false)
                     {
@@ -316,7 +322,7 @@ public class EhomeServer {
                     FileOutputStream fout;
                     try {
                         fout = new FileOutputStream(strFilePath);
-                        //½«×Ö½ÚĞ´ÈëÎÄ¼ş
+                        //å°†å­—èŠ‚å†™å…¥æ–‡ä»¶
                         long offset = 0;
                         ByteBuffer buffers = pFileBuf.getByteBuffer(offset, dwFileLen);
                         byte[] bytes = new byte[dwFileLen];
